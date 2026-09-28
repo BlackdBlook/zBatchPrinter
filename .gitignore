@@ -1,0 +1,26 @@
+# 依赖
+node_modules/
+
+# 运行时产物（上传的文件与排版缓存，服务启动时自动清空）
+temp/
+
+# 自动下载的打印引擎（SumatraPDF 便携版，首次运行会按需重新下载）
+tools/
+
+# 日志
+*.log
+npm-debug.log*
+
+# 测试产物（样本由 tests/make-samples.mjs 重新生成）
+tests/samples/
+tests/out/
+tests/testpage.pdf
+tests/queue-observations.txt
+
+# 编辑器 / 系统文件
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

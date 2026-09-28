@@ -1,0 +1,18 @@
+{
+  "name": "batchprint",
+  "version": "1.0.0",
+  "private": true,
+  "description": "本地 PDF 批量打印服务（网页端统一设置排版后静默批量打印）",
+  "license": "MIT",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1",
+    "pdf-to-img": "^6.2.0"
+  }
+}

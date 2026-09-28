@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF 批量打印</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">🖨️ PDF 批量打印</div>
+    <div class="header-status">
+      <span id="engineBadge" class="badge badge-muted">引擎检测中…</span>
+      <span id="printerBadge" class="badge badge-muted">打印机加载中…</span>
+    </div>
+  </header>
+
+  <div id="engineBanner" class="banner hidden"></div>
+
+  <main>
+    <!-- 左列：文件 -->
+    <section class="card">
+      <div class="card-title">
+        <h2>文件</h2>
+        <button id="clearBtn" class="ghost" title="移除全部文件">清空</button>
+      </div>
+      <div id="dropZone" class="dropzone" tabindex="0">
+        <input type="file" id="fileInput" accept="application/pdf,.pdf" multiple hidden>
+        <div class="dz-icon">📄</div>
+        <div class="dz-text"><strong>点击选择 PDF 文件</strong>，或拖拽文件 / 文件夹到此处（可多选，文件夹会递归查找其中的 PDF）</div>
+        <div class="dz-hint">文件仅保存在本机临时目录，打印完成后可关闭服务自动清理</div>
+      </div>
+      <ul id="fileList" class="filelist"></ul>
+      <div id="emptyHint" class="empty-hint">尚未添加文件</div>
+      <div id="fileSummary" class="card-foot"></div>
+    </section>
+
+    <!-- 右列：设置 -->
+    <section class="card">
+      <div class="card-title">
+        <h2>打印设置</h2>
+        <button id="resetBtn" class="ghost" title="恢复默认设置">重置</button>
+      </div>
+
+      <div class="form-grid">
+        <label class="field span2">
+          <span>打印机</span>
+          <div class="inline">
+            <select id="setPrinter"></select>
+            <button id="refreshPrinters" class="ghost" title="重新获取打印机列表">↻</button>
+          </div>
+        </label>
+
+        <label class="field">
+          <span>纸张大小</span>
+          <select id="setPaper">
+            <option value="A4" selected>A4</option>
+            <option value="A3">A3</option>
+            <option value="A5">A5</option>
+            <option value="B5">B5</option>
+            <option value="Letter">Letter</option>
+            <option value="Legal">Legal</option>
+          </select>
+        </label>
+
+        <div class="field">
+          <span>方向</span>
+          <div class="segmented" id="setOrientation">
+            <label><input type="radio" name="orientation" value="auto" checked><span>自动</span></label>
+            <label><input type="radio" name="orientation" value="portrait"><span>纵向</span></label>
+            <label><input type="radio" name="orientation" value="landscape"><span>横向</span></label>
+          </div>
+        </div>
+
+        <div class="field span2">
+          <span>缩放</span>
+          <div class="inline">
+            <div class="segmented grow" id="setScaleMode">
+              <label><input type="radio" name="scaleMode" value="fit" checked><span>适应页面</span></label>
+              <label><input type="radio" name="scaleMode" value="actual"><span>实际大小</span></label>
+              <label><input type="radio" name="scaleMode" value="custom"><span>自定义</span></label>
+            </div>
+            <div class="inline hidden" id="scalePercentWrap">
+              <input type="number" id="setScalePercent" min="10" max="400" step="5" value="100">
+              <span class="unit">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field span2">
+          <span>
+            页边距（mm）
+            <button id="marginLock" class="lockbtn locked" title="四边联动：开">🔗</button>
+          </span>
+          <div class="margins">
+            <label class="margin-item"><em>上</em><input type="number" id="mTop" min="0" max="100" step="0.5" value="0"></label>
+            <label class="margin-item"><em>右</em><input type="number" id="mRight" min="0" max="100" step="0.5" value="0"></label>
+            <label class="margin-item"><em>下</em><input type="number" id="mBottom" min="0" max="100" step="0.5" value="0"></label>
+            <label class="margin-item"><em>左</em><input type="number" id="mLeft" min="0" max="100" step="0.5" value="0"></label>
+          </div>
+        </div>
+
+        <label class="field">
+          <span>水平对齐</span>
+          <select id="setHalign">
+            <option value="center" selected>居中</option>
+            <option value="left">靠左</option>
+            <option value="right">靠右</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>垂直对齐</span>
+          <select id="setValign">
+            <option value="middle" selected>居中</option>
+            <option value="top">靠上</option>
+            <option value="bottom">靠下</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>份数</span>
+          <input type="number" id="setCopies" min="1" max="50" step="1" value="1">
+        </label>
+        <label class="field">
+          <span>双面</span>
+          <select id="setDuplex">
+            <option value="default" selected>跟随打印机默认</option>
+            <option value="simplex">单面</option>
+            <option value="duplexlong">双面（长边翻页）</option>
+            <option value="duplexshort">双面（短边翻页）</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>颜色</span>
+          <select id="setColor">
+            <option value="default" selected>跟随打印机默认</option>
+            <option value="color">彩色</option>
+            <option value="monochrome">黑白</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="printBtn" class="primary big">🖨️ 开始批量打印</button>
+
+      <div id="jobBar" class="jobbar hidden">
+        <div class="jobbar-row">
+          <span id="jobText">正在打印…</span>
+          <button id="cancelBtn" class="danger ghost">取消</button>
+        </div>
+        <div class="progress"><div id="jobProgressFill"></div></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 预览 -->
+  <section class="card preview-card" id="previewCard">
+    <div class="card-title">
+      <h2>预览</h2>
+      <div class="inline">
+        <span id="previewFile" class="muted"></span>
+        <button id="previewBtn" class="ghost">生成预览</button>
+      </div>
+    </div>
+    <div id="previewHint" class="empty-hint">添加文件后点击「生成预览」，或直接单击左侧列表中的文件切换预览；修改设置会自动刷新（浏览器自带 PDF 查看器渲染）。</div>
+    <iframe id="previewFrame" class="hidden" title="PDF 预览"></iframe>
+  </section>
+
+  <footer>本地服务 · 文件不会上传到互联网 · 静默打印引擎：SumatraPDF（首次使用自动下载便携版）</footer>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="/traverse.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
